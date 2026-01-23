@@ -35,8 +35,8 @@ class Usuario:
         if not nombre:
             raise ValueError("El nombre de usuario no puede estar vacío.")
 
-        if rol not in ("user", "admin"):
-            raise ValueError("El rol debe ser 'user' o 'admin'.")
+        if rol not in ("user", "supervisor", "admin"):
+            raise ValueError("El rol debe ser 'user', 'supervisor' o 'admin'.")
 
         self.id: str = user_id or str(uuid4())
         self.nombre: str = nombre
@@ -108,6 +108,19 @@ class Usuario:
             bool: True si es admin.
         """
         return self.rol == "admin"
+    
+    def es_supervisor(self) -> bool:
+        """
+        Indica si el usuario es supervisor.
+
+        Returns:
+            bool: True si es supervisor.
+        """
+        return self.rol == "supervisor"
+
+    def tiene_rol(self, *roles: str) -> bool:
+        return self.rol in roles
+
 
     # -------------------------
     # Serialización
@@ -193,7 +206,9 @@ class Usuario:
 if __name__ == "__main__":
     print("=== INICIANDO TESTS DE USUARIO ===\n")
 
-    # Crear usuario sin contraseña
+    # --------------------------------------------------
+    # Usuario común sin contraseña
+    # --------------------------------------------------
     usuario = Usuario(
         nombre="jdoe",
         nombre_visible="John Doe",
@@ -201,6 +216,8 @@ if __name__ == "__main__":
 
     print("✔ Usuario creado sin contraseña")
     assert usuario.password_hash is None
+    assert not usuario.es_admin()
+    assert not usuario.es_supervisor()
 
     # Forzar error al verificar sin password
     try:
@@ -222,7 +239,24 @@ if __name__ == "__main__":
     print("✔ Contraseña reseteada")
     assert usuario.password_hash is None
 
-    # Crear admin
+    # --------------------------------------------------
+    # Supervisor
+    # --------------------------------------------------
+    supervisor = Usuario(
+        nombre="sup1",
+        nombre_visible="Supervisor Uno",
+        rol="supervisor",
+        password="sup123",
+    )
+
+    print("✔ Usuario supervisor creado")
+    assert supervisor.es_supervisor()
+    assert not supervisor.es_admin()
+    assert supervisor.verificar_password("sup123") is True
+
+    # --------------------------------------------------
+    # Admin
+    # --------------------------------------------------
     admin = Usuario(
         nombre="admin",
         nombre_visible="Administrador",
@@ -230,16 +264,22 @@ if __name__ == "__main__":
         password="admin123",
     )
 
-    assert admin.es_admin() is True
-    print("✔ Usuario admin detectado correctamente")
+    print("✔ Usuario admin creado")
+    assert admin.es_admin()
+    assert not admin.es_supervisor()
+    assert admin.verificar_password("admin123") is True
 
+    # --------------------------------------------------
     # Serialización
+    # --------------------------------------------------
     json_data = admin.to_json()
     print("\nJSON generado:")
     print(json_data)
 
     usuario_copiado = Usuario.from_json(json_data)
     assert usuario_copiado.verificar_password("admin123") is True
+    assert usuario_copiado.es_admin()
+
     print("✔ Serialización y deserialización correctas")
 
     print("\n=== TODOS LOS TESTS PASARON ✅ ===")

@@ -121,6 +121,47 @@ def menu_admin(
             ui.pausa()
 
 
+def menu_supervisor(
+    ui: InterfazConsola,
+    gestor: GestorTareas,
+    usuario: Usuario,
+) -> None:
+    while True:
+        ui.limpiar_pantalla()
+        opcion = ui.mostrar_menu_supervisor()
+
+        try:
+            if opcion == "1":
+                ui.limpiar_pantalla()
+                datos = ui.pedir_datos_nueva_tarea()
+                tarea = gestor.crear_tarea(usuario, **datos)
+                ui.mostrar_exito("Tarea creada correctamente.")
+                ui.pausa()
+
+            elif opcion == "2":
+                ui.limpiar_pantalla()
+                nombre_usuario = ui.pedir_usuario_destino()
+                nombre_tarea = ui.pedir_tarea_a_asignar()
+                gestor.asignar_usuario_tarea(
+                    usuario,
+                    nombre_usuario,
+                    nombre_tarea,
+                )
+                ui.mostrar_exito("Tarea asignada correctamente.")
+                ui.pausa()
+
+            elif opcion == "0":
+                return
+
+            else:
+                ui.mostrar_advertencia("Opción inválida.")
+                ui.pausa()
+
+        except (ValueError, PermissionError) as e:
+            ui.mostrar_error(str(e))
+            ui.pausa()
+
+
 def menu_usuario(
     ui: InterfazConsola,
     gestor: GestorTareas,
@@ -188,8 +229,11 @@ def main() -> None:
 
         if usuario_actual.es_admin():
             menu_admin(ui, gestor, usuario_actual)
+        elif usuario_actual.es_supervisor():
+            menu_supervisor(ui, gestor, usuario_actual)
         else:
             menu_usuario(ui, gestor, usuario_actual)
+
 
 
 if __name__ == "__main__":

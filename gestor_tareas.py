@@ -114,13 +114,20 @@ class GestorTareas:
     # Tareas
     # ==================================================
 
-    def crear_tarea(self, nombre: str, descripcion: str) -> Tarea:
+
+    def crear_tarea(self, nombre: str, descripcion: str, actor: Usuario) -> Tarea:
         """
         Crea una nueva tarea.
 
         Raises:
             ValueError: Si el nombre ya existe.
         """
+        if not (actor.es_admin() or actor.es_supervisor()):
+            raise PermissionError(
+                "Solo administradores o supervisores pueden crear tareas."
+            )
+
+
         if nombre in self.tareas:
             raise ValueError("Ya existe una tarea con ese nombre.")
 
@@ -129,18 +136,30 @@ class GestorTareas:
         self._guardar_todo()
         return tarea
 
-    def asignar_usuario_tarea(self, nombre_usuario: str, nombre_tarea: str) -> None:
-        """
-        Asigna un usuario a una tarea existente.
-        """
+
+    def asignar_usuario_tarea(
+        self,
+        actor: Usuario,
+        nombre_usuario: str,
+        nombre_tarea: str,
+    ) -> None:
+        if not (actor.es_admin() or actor.es_supervisor()):
+            raise PermissionError("No tiene permisos para asignar tareas.")
+
         usuario = self.usuarios.get(nombre_usuario)
         tarea = self.tareas.get(nombre_tarea)
 
         if not usuario or not tarea:
             raise ValueError("Usuario o tarea inexistente.")
 
+        if actor.es_supervisor() and usuario.rol != "user":
+            raise PermissionError(
+                "Un supervisor solo puede asignar tareas a usuarios comunes."
+            )
+
         tarea.agregar_usuario(usuario)
         self._guardar_todo()
+
 
     def finalizar_tarea(self, nombre_tarea: str) -> None:
         """

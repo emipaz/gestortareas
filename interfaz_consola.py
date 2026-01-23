@@ -121,6 +121,22 @@ class InterfazConsola:
         self.console.print(panel)
         return Prompt.ask("Opción")
 
+    def mostrar_menu_supervisor(self) -> str:
+        panel = Panel(
+            "\n".join(
+                [
+                    "1️⃣ Crear tarea",
+                    "2️⃣ Asignar tarea a usuario",
+                    "",
+                    "0️⃣ Logout",
+                ]
+            ),
+            title="Menú Supervisor",
+            border_style="blue",
+        )
+        self.console.print(panel)
+        return Prompt.ask("Opción")
+
     def mostrar_menu_usuario(self) -> str:
         panel = Panel(
             "\n".join(
@@ -165,7 +181,11 @@ class InterfazConsola:
 
         nombre = Prompt.ask("Username")
         visible = Prompt.ask("Nombre visible")
-        rol = Prompt.ask("Rol", choices=["user", "admin"], default="user")
+        rol = Prompt.ask(
+            "Rol",
+            choices=["user", "supervisor", "admin"],
+            default="user",
+        )
         tiene_pwd = Confirm.ask("¿Asignar contraseña ahora?", default=False)
 
         password = None
@@ -181,6 +201,9 @@ class InterfazConsola:
 
     def pedir_usuario_para_reset(self) -> str:
         return Prompt.ask("Username a resetear")
+
+    def pedir_usuario_destino(self) -> str:
+        return Prompt.ask("Usuario destino")
 
     # ==================================================
     # Tareas
@@ -212,6 +235,9 @@ class InterfazConsola:
 
     def pedir_tarea_a_finalizar(self) -> str:
         return Prompt.ask("Nombre de la tarea a finalizar")
+
+    def pedir_tarea_a_asignar(self) -> str:
+        return Prompt.ask("Nombre de la tarea")
 
     # ==================================================
     # Perfil y estadísticas
