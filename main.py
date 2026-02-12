@@ -135,7 +135,7 @@ def menu_supervisor(
             if opcion == "1":
                 ui.limpiar_pantalla()
                 datos = ui.pedir_datos_nueva_tarea()
-                tarea = gestor.crear_tarea(usuario, **datos)
+                tarea = gestor.crear_tarea(actor=usuario, **datos)
                 ui.mostrar_exito("Tarea creada correctamente.")
                 ui.pausa()
 
@@ -182,8 +182,12 @@ def menu_usuario(
             elif opcion == "2":
                 ui.limpiar_pantalla()
                 datos = ui.pedir_datos_nueva_tarea()
-                tarea = gestor.crear_tarea(**datos)
-                gestor.asignar_usuario_tarea(usuario.nombre, tarea.nombre)
+                tarea = gestor.crear_tarea(actor=usuario, **datos)
+                gestor.asignar_usuario_tarea(
+                    actor=usuario,
+                    nombre_usuario=usuario.nombre,
+                    nombre_tarea=tarea.nombre,
+                )
                 ui.mostrar_exito("Tarea creada y asignada.")
                 ui.pausa()
 
